@@ -1,6 +1,6 @@
 # Sweep checklist
 
-Run through this list for each sweep. Replace the `<…>` placeholders with your setup from the "Configure for your setup" table in `SKILL.md`.
+Run through this list for each sweep. The `<…>` values come from your control tower config file (see "Settings" in `SKILL.md`).
 
 ## 1. List
 

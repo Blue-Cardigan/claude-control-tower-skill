@@ -1,6 +1,6 @@
 ---
 name: control-tower-general
-description: Run one long-lived "control tower" Claude Code session that coordinates your other sessions. It gives check-ins on what each session is doing, keeps a register of decisions waiting on you, routes new work and follow-ups to the right session, sweeps idle sessions (archiving finished ones, resuming stalled ones), recycles long sessions through hand-over notes, and keeps merges, deploys and heavy jobs from colliding. Use when you say "be my control tower", "check in across sessions", "what's waiting on me", "sweep the sessions", "decisions digest", "who owns this", or "route this to the right session".
+description: Run one long-lived "control tower" Claude Code session that coordinates your other sessions. It gives check-ins on what each session is doing, keeps a register of decisions waiting on you, routes new work and follow-ups to the right session, sweeps idle sessions (archiving finished ones, resuming stalled ones), recycles long sessions through hand-over notes, and keeps merges, deploys and heavy jobs from colliding. Use when you say "set up control tower", "be my control tower", "check in across sessions", "what's waiting on me", "sweep the sessions", "decisions digest", "who owns this", or "route this to the right session".
 ---
 
 # Control tower
@@ -13,21 +13,38 @@ The control tower is one long-lived session that watches all your other sessions
 
 It works best in the desktop app, which can list, message, archive and group sessions. It also works with several terminal sessions; each section says what to do when a capability is missing.
 
-## Configure for your setup
+## Settings
 
-Fill these in before first use. Keep the filled-in copy private if it names real systems.
+The tower's settings live in a config file, not in this skill, so you can update the skill without losing them. By default the file is `.claude/control-tower.local.md` in the repository where the tower runs; you can put it in your notes folder instead. Read it at the start of every tower session. If it is missing, run **First run** below before anything else.
 
-| Setting | Your value | Example |
-|---|---|---|
-| Trunk branch | `<TRUNK>` | `main` |
-| Integration command (merge a branch to trunk) | `<INTEGRATE_CMD> <branch>` | `gh pr merge --squash <branch>`, or a merge script |
-| Deploy targets, and which need your explicit go | `<DEPLOY_TARGETS>` / `<APPROVAL_TARGETS>` | staging; production needs approval |
-| Shared notes folder (outside the repo) | `<NOTES_DIR>` | `~/session-notes/` |
-| Client-data boundary | `<CLIENT_DATA_RULES>` | see below |
-| Heavy-job runner | `<HEAVY_JOB_CMD>` | a wrapper that waits for free memory before running a command |
-| Sweep cadence | `<CADENCE>` | every 3–4 hours |
+The file holds these values, which the rest of this skill refers to by name (template: [`references/config-template.md`](references/config-template.md)):
 
-**Client-data boundary (placeholder).** If any session handles data that belongs to a client or third party, write the rules here: where that data may and may not be stored, which sessions may read it, and who must approve adding a person to it. The tower puts these rules in every brief. If you have no such data, write "none".
+| Setting | Meaning |
+|---|---|
+| `<TRUNK>` | The branch all work integrates into |
+| `<INTEGRATE_CMD>` | The command that merges one branch into trunk |
+| `<DEPLOY_TARGETS>` | Each deploy target and the command that deploys it |
+| `<APPROVAL_TARGETS>` | Targets and actions that need your explicit go in the acting session |
+| `<NOTES_DIR>` | A shared notes folder outside the repo, for the register and hand-over notes |
+| `<CLIENT_DATA_RULES>` | Your rules for client or third-party data, or "none" |
+| `<HEAVY_JOB_CMD>` | How heavy jobs are run so they don't exhaust memory, or "none" |
+| `<CADENCE>` | How often to sweep |
+
+**Client-data boundary.** If any session handles data that belongs to a client or third party, `<CLIENT_DATA_RULES>` says where that data may and may not be stored, which sessions may read it, and who must approve adding a person to it. The tower puts these rules in every brief.
+
+## First run
+
+Run when you say "set up control tower", or when the config file is missing.
+
+1. **Look at the repository** before asking anything. Find the default branch (`git remote show origin`), how changes land (pull requests, a merge script, direct pushes), deploy or release scripts, CI workflows, and any existing agent instructions (`CLAUDE.md`, `AGENTS.md`).
+2. **Propose values** for every setting, saying where each came from, and mark the ones you could not find. Ask the user to confirm or correct them in one round.
+3. **Write the config file** from the template. Create `<NOTES_DIR>` if needed, and an empty `decisions-awaiting-owner.md` in it from [`references/decisions-register-template.md`](references/decisions-register-template.md). If the config sits inside the repo, offer to add it to `.gitignore`.
+4. **Offer the session rules** in [`references/claude-md-snippet.md`](references/claude-md-snippet.md) for the repository's `CLAUDE.md`, so worker sessions cooperate with the tower: they refuse relayed approvals, use one worktree and branch per task, report where their work is, and write hand-over notes when asked. Show the exact text, and edit `CLAUDE.md` only with the user's go.
+5. **Point out missing safeguards** without building them unasked:
+   - no lock around merges, so two sessions can integrate at once;
+   - no single deploy command per target, so sessions deploy in different ways;
+   - no worktree-per-task habit, so sessions edit the same checkout.
+6. **Run a first check-in** and report what the tower can see.
 
 ## Standing rules
 

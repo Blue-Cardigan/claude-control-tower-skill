@@ -9,17 +9,32 @@ mkdir -p ~/.claude/skills/control-tower-general
 cp -R SKILL.md references ~/.claude/skills/control-tower-general/
 ```
 
-Run the copy from the root of this repository. Then open `~/.claude/skills/control-tower-general/SKILL.md` and fill in the "Configure for your setup" table: your trunk branch, integration command, deploy targets and which need your explicit approval, your shared notes folder, your client-data rules (or "none"), and your heavy-job runner.
+Run the copy from the root of this repository.
+
+## Initialise
+
+Open Claude Code in the repository you want coordinated and say **"set up control tower"**. The tower will:
+
+1. look at the repository (default branch, how changes merge, deploy scripts, CI, existing `CLAUDE.md`) and propose its settings for you to confirm;
+2. write them to `.claude/control-tower.local.md`, so the skill itself stays unchanged and easy to update;
+3. create your notes folder and an empty decisions register;
+4. offer a short block for your `CLAUDE.md` so every other session cooperates with the tower (no relayed approvals, one worktree per task, clear hand-over notes); it only edits `CLAUDE.md` if you say yes;
+5. point out missing safeguards, such as no lock around merges or no single deploy command per target;
+6. run a first check-in.
+
+You can also fill in [`references/config-template.md`](references/config-template.md) by hand and save it as `.claude/control-tower.local.md`.
 
 ## Use
 
-Start a session and say "be my control tower", then ask for a check-in, a sweep or a decisions digest. Pin that session if your app allows it.
+After setup, keep that session as your tower: ask it for a check-in, a sweep or a decisions digest. Pin it if your app allows it.
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `SKILL.md` | The skill: configuration, standing rules, routines and pitfalls |
+| `SKILL.md` | The skill: settings, first-run setup, standing rules, routines and pitfalls |
+| `references/config-template.md` | Template for your settings file |
+| `references/claude-md-snippet.md` | Optional rules for your `CLAUDE.md` so other sessions cooperate |
 | `references/sweep-checklist.md` | Step-by-step sweep, including the branch check before archiving |
 | `references/decisions-register-template.md` | Template for the decisions register kept in your notes folder |
 
